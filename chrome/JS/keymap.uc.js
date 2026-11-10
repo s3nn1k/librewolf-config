@@ -90,8 +90,17 @@ function comboToHotkey(combo) {
             continue;
         }
         const { modifiers, key } = comboToHotkey(combo);
+        // Не строкой, а функцией с явным doCommand(): событие уходит на
+        // <command> внутри mainCommandSet, где его ждёт switch browser-sets.js
+        // (строчная привязка из ucKeySet до switch местами не доходит).
         UC_API.Hotkeys
-            .define({ id: "keymap-" + id, modifiers, key, command })
+            .define({ id: "keymap-" + id, modifiers, key,
+                command: win => {
+                    const el = win.document.getElementById(command);
+                    console.info("keymap: fire " + combo + " -> " + command +
+                        (el ? " (disabled=" + el.getAttribute("disabled") + ")" : " ЭЛЕМЕНТА НЕТ"));
+                    if (el) el.doCommand();
+                } })
             .attachToWindow(window, { suppressOriginal: true });
         report.push(combo + "->" + command);
     }
