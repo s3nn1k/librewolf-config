@@ -11,7 +11,7 @@ dotfiles-fedora клонирует его в ~/projects/personal/librewolf-confi
   devtools-extra);
 - templates/*.tmpl - каркасы css с {{роль}} и {{БЛОК}};
 - chrome/ - собранные css (коммитятся, пересборка по изменению);
-- merge-policies.py - сборка политик: пакетная база + оверлей + sidebery-стили.
+- scripts/ - build, audit, merge-policies;: пакетная база + оверлей + sidebery-стили.
 
 ## Команды
 

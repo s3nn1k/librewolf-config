@@ -9,7 +9,7 @@ import pathlib
 import re
 import sys
 
-ROOT = pathlib.Path(__file__).resolve().parent
+ROOT = pathlib.Path(__file__).resolve().parent.parent
 PALETTE = json.loads((ROOT / "palette.json").read_text())
 
 

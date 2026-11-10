@@ -44,7 +44,7 @@ def registry():
 
 def covered():
     got = set()
-    for css in (pathlib.Path(__file__).parent / "chrome").glob("*.css"):
+    for css in (pathlib.Path(__file__).parent.parent / "chrome").glob("*.css"):
         got |= set(re.findall(r"(--[a-z0-9-]+)[ ]*:", css.read_text()))
     return got
 
