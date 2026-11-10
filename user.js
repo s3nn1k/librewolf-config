@@ -75,6 +75,13 @@ user_pref("browser.quitShortcut.disabled", true);        // false (дефолт)
 user_pref("browser.ctrlTab.sortByRecentlyUsed", false);  // false (дефолт) -> false: закрепить линейный порядок Ctrl+Tab по вкладкам, не MRU-прыжки
 user_pref("browser.backspace_action", 0);                // 2 (дефолт новых Firefox) -> 0: Backspace = назад по истории, как в навигации
 
+// Регион: единый KZ и запрет авто-обновлений - от региона зависит набор
+// поисковых движков (search-config-v2), скачки RU ломали инициализацию поиска
+// в части профилей.
+user_pref("browser.search.region", "KZ");
+user_pref("browser.region.update.enabled", false);
+user_pref("browser.region.network.url", "");
+
 // Тема: единый тёмный системный виджет-базис во всех профилях
 // (иначе в части профилей скроллбары/тултипы хрома берут системную светлую).
 user_pref("ui.systemUsesDarkTheme", 1);
