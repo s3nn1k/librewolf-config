@@ -14,7 +14,6 @@ dnf update librewolf затирает файлы в /usr/share/librewolf - по�
 import os
 import pathlib
 import shutil
-import subprocess
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -49,6 +48,18 @@ def clear_startup_cache():
 
 
 def main():
+    # --files: только установка (под sudo из bootstrap); --cache: только чистка
+    # startupCache; без флагов - интерактивный запуск из make autoconfig.
+    mode = sys.argv[1] if len(sys.argv) > 1 else ""
+    if mode == "--files":
+        if os.geteuid() != 0:
+            print("--files требует root (запускай через sudo)", file=sys.stderr)
+            return 1
+        install()
+        return 0
+    if mode == "--cache":
+        clear_startup_cache()
+        return 0
     if os.geteuid() == 0:
         install()
     else:
