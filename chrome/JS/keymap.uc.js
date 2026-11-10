@@ -1,35 +1,25 @@
 // ==UserScript==
 // @name            keymap
-// @description     nvim-раскладка ядра через официальный API fx-autoconfig
+// @description     allowlist-раскладка хоткеев ядра, конфиг - keymap.json
 // @author          s3nn1k
 // @homepageURL     https://github.com/s3nn1k/librewolf-config
 // ==/UserScript==
 
-// Конфиг в chrome/JS/keymap.json:
-//   keep.ids / keep.commands - остаются нативными в mainKeyset;
-//   remap (id -> комбинация) - команда исходного <key> вешается через
-//     UC_API.Hotkeys на новую комбинацию (ключ в отдельном ucKeySet);
-//   custom (комбинация -> действие) - команда-функция того же API;
-//   всё непокрытое отключается в mainKeyset (fail-closed).
-//
-// Каноничный путь вместо ручной правки keyset: UC_API.Hotkeys.define +
-// attachToWindow сами делают <key>/<command> после загрузки окна,
-// suppressOriginal гасит исходную комбинацию.
+// keep - остаются нативными; remap (id ключа -> новая комбинация) и custom
+// (комбинация -> действие) вешаются через UC_API.Hotkeys в отдельный ucKeySet;
+// всё остальное в mainKeyset гасится - fail-closed. Сторонние keyset'ы
+// (расширения вроде Sidebery, devtools) не трогаем. Комбинации вида "C+S+n".
 
-const KEYMAP_ACTIONS = {
+const ACTIONS = {
     "scroll-down": win => scrollHalfPage(win, true),
     "scroll-up": win => scrollHalfPage(win, false),
     "focus-urlbar": win => {
-        if (win.gURLBar) {
-            win.gURLBar.focus();
-            win.gURLBar.select();
-        }
+        if (win.gURLBar) { win.gURLBar.focus(); win.gURLBar.select(); }
     },
 };
 
-// Скролл контента из chrome: windowUtils.sendKeyEvent выпилен из Gecko,
-// frame script через messageManager исполняется в процессе страницы и
-// скроллит её окно - честные полстраницы, как C-d/C-u в nvim.
+// windowUtils.sendKeyEvent из Gecko выпилен: скроллим страницу frame script'ом
+// через messageManager - исполняется в процессе контента, честные полстраницы.
 function scrollHalfPage(win, down) {
     const browser = win.gBrowser && win.gBrowser.selectedBrowser;
     if (!browser || !browser.messageManager) return;
@@ -38,13 +28,12 @@ function scrollHalfPage(win, down) {
         "data:,content.scrollBy(0, " + sign + "content.innerHeight / 2);", false);
 }
 
-// "C+S+n" -> { modifiers: "accel shift", key: "n" } - формат UC_API.Hotkeys
-// (модификаторы через пробел, ctrl нормализуется в accel самим API).
+// "C+S+n" -> { modifiers: "accel shift", key: "n" } - формат UC_API.Hotkeys.
 function comboToHotkey(combo) {
     const parts = combo.split("+");
     const key = parts.pop();
-    const map = { C: "accel", S: "shift", A: "alt", M: "meta" };
-    return { modifiers: parts.map(p => map[p]).join(" "), key };
+    const mod = { C: "accel", S: "shift", A: "alt", M: "meta" };
+    return { modifiers: parts.map(p => mod[p]).join(" "), key };
 }
 
 (async () => {
@@ -55,67 +44,46 @@ function comboToHotkey(combo) {
         console.error("keymap: keymap.json не читается", e);
         return;
     }
-
     if (!window.UC_API || !window.UC_API.Hotkeys) {
-        console.error("keymap: UC_API недоступен - fx-autoconfig не загрузился");
+        console.error("keymap: fx-autoconfig не загрузился");
         return;
     }
     const keyset = document.getElementById("mainKeyset");
     if (!keyset) return;
 
-    // Allowlist только mainKeyset: сторонние keyset'ы (расширения вида
-    // Sidebery C+E, devtools C+S+J) создают свои <key> динамически и должны
-    // жить. internal-флаг снимаем: такие ключи регятся в раннюю таблицу,
-    // которая игнорирует disabled - их комбинации перехватывает listener ниже.
-    const keepIds = new Set((conf.keep && conf.keep.ids) || []);
-    const keepCommands = new Set((conf.keep && conf.keep.commands) || []);
+    // 1. Allowlist: гасим всё непокрытое в mainKeyset.
+    const keepIds = new Set(conf.keep.ids || []);
+    const keepCommands = new Set(conf.keep.commands || []);
     let disabled = 0;
-    for (const key of keyset.querySelectorAll("key")) {
-        const id = key.getAttribute("id") || "";
-        const command = key.getAttribute("command") || "";
+    for (const k of keyset.querySelectorAll("key")) {
+        const id = k.getAttribute("id") || "";
+        const command = k.getAttribute("command") || "";
         if (keepIds.has(id) || keepCommands.has(command)) continue;
-        key.setAttribute("disabled", "true");
-        key.removeAttribute("reserved");
-        key.removeAttribute("internal");
+        k.setAttribute("disabled", "true");
+        k.removeAttribute("reserved");
         disabled++;
     }
 
-    const report = [];
+    // 2. Ремапы и кастомы - в ucKeySet. Команда исполняется явным doCommand()
+    // на <command> из mainCommandSet: его switch в browser-sets.js делает работу.
+    const bind = (name, combo, command) =>
+        UC_API.Hotkeys
+            .define({ id: "keymap-" + name, ...comboToHotkey(combo), command })
+            .attachToWindow(window, { suppressOriginal: true });
+
     for (const [id, combo] of Object.entries(conf.remap || {})) {
         const orig = keyset.querySelector("key#" + id);
         const command = orig && orig.getAttribute("command");
-        if (!command) {
-            console.error("keymap: remap-ключ " + id + " без command, пропущен");
-            continue;
-        }
-        const { modifiers, key } = comboToHotkey(combo);
-        // Не строкой, а функцией с явным doCommand(): событие уходит на
-        // <command> внутри mainCommandSet, где его ждёт switch browser-sets.js
-        // (строчная привязка из ucKeySet до switch местами не доходит).
-        UC_API.Hotkeys
-            .define({ id: "keymap-" + id, modifiers, key,
-                command: win => {
-                    const el = win.document.getElementById(command);
-                    console.info("keymap: fire " + combo + " -> " + command +
-                        (el ? " (disabled=" + el.getAttribute("disabled") + ")" : " ЭЛЕМЕНТА НЕТ"));
-                    if (el) el.doCommand();
-                } })
-            .attachToWindow(window, { suppressOriginal: true });
-        report.push(combo + "->" + command);
+        if (!command) { console.error("keymap: " + id + " без command"); continue; }
+        bind(id, combo, win => {
+            const el = win.document.getElementById(command);
+            if (el) el.doCommand();
+        });
     }
-
     for (const [combo, action] of Object.entries(conf.custom || {})) {
-        if (!(action in KEYMAP_ACTIONS)) {
-            console.error("keymap: неизвестное действие " + action);
-            continue;
-        }
-        const { modifiers, key } = comboToHotkey(combo);
-        UC_API.Hotkeys
-            .define({ id: "keymap-" + action, modifiers, key,
-                command: win => KEYMAP_ACTIONS[action](win) })
-            .attachToWindow(window, { suppressOriginal: true });
-        report.push(combo + "->" + action);
+        if (!ACTIONS[action]) { console.error("keymap: действие " + action); continue; }
+        bind(action, combo, win => ACTIONS[action](win));
     }
 
-    console.info("keymap: отключено " + disabled + "; бинды: " + report.join(" "));
+    console.info("keymap: отключено " + disabled);
 })();

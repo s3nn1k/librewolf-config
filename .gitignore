@@ -1,2 +1,4 @@
+# Сборочные артефакты
 policies.merged.json
 __pycache__/
+*.pyc
