@@ -55,7 +55,11 @@ def fill(template_path, blocks):
 
 def main():
     status = 0
-    status |= fill("templates/userChrome.css.tmpl", {"CHROME_THEME_BLOCK": vars_block("mappings/chrome.json")})
+    status |= fill("templates/userChrome.css.tmpl", {
+        "CHROME_THEME_BLOCK": vars_block("mappings/chrome.json"),
+        "DEVTOOLS_VARS": vars_block("mappings/devtools.json"),
+        "DEVTOOLS_EXTRA_VARS": vars_block("mappings/devtools-extra.json"),
+    })
     status |= fill("templates/sidebery.css.tmpl", {})
     status |= fill("templates/userContent.css.tmpl", {
         "CHROME_THEME_VARS": vars_block("mappings/chrome.json"),

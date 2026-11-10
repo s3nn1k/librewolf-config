@@ -130,3 +130,14 @@ menupopup > menu{ padding-block: 0.3em !important; }
 #sidebar-box { padding-inline-start: 0px !important; }
 
 * { border-radius: 0px !important; }
+
+/* DevTools в отдельном chrome-окне (Browser Console, C+S+J): userContent.css
+   туда не дотягивается - дублируем тему DevTools в chrome-домен. */
+@-moz-document url-prefix("chrome://devtools/") {
+  :root {
+{{DEVTOOLS_VARS}}
+  }
+  :root {
+{{DEVTOOLS_EXTRA_VARS}}
+  }
+}
