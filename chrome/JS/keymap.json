@@ -1,5 +1,5 @@
 {
-  "_doc": "Allowlist mainKeyset LibreWolf. keep - натив, remap - новая комбинация по id ключа, custom - действия keymap.uc.js; всё остальное отключается. C=Ctrl, S=Shift, A=Alt, M=Super.",
+  "_doc": "Allowlist mainKeyset LibreWolf. keep - натив, remap - новая комбинация по id ключа (ucKeySet), internal - комбинации, перехватываемые listener'ом ДО keyset (обход early-registration, напр. select-all), custom - действия keymap.uc.js; всё остальное в mainKeyset отключается. C=Ctrl, S=Shift, A=Alt, M=Super.",
   "keep": {
     "ids": [
       "key_find",
@@ -31,11 +31,13 @@
     "goBackKb": "C+P",
     "goForwardKb": "C+N",
     "key_newNavigatorTab": "C+S+N",
-    "addBookmarkAsKb": "C+A",
-    "key_toggleReaderMode": "C+R",
     "key_reload": "C+S+R",
     "key_close": "C+Q",
     "key_openDownloads": "C+J"
+  },
+  "internal": {
+    "C+A": "Browser:AddBookmarkAs",
+    "C+R": "View:ReaderView"
   },
   "custom": {
     "C+D": "scroll-down",
