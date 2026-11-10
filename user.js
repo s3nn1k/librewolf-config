@@ -75,6 +75,11 @@ user_pref("browser.quitShortcut.disabled", true);        // false (дефолт)
 user_pref("browser.ctrlTab.sortByRecentlyUsed", false);  // false (дефолт) -> false: закрепить линейный порядок Ctrl+Tab по вкладкам, не MRU-прыжки
 user_pref("browser.backspace_action", 0);                // 2 (дефолт новых Firefox) -> 0: Backspace = назад по истории, как в навигации
 
+// NewTab: выключить nova-виджеты (погода/акции) - их фиды живут в
+// блокируемых LW RS-коллекциях, приложение newtab падает на загрузке
+// и рисует мёртвую поисковую строку. Классическая раскладка работает.
+user_pref("browser.newtabpage.activity-stream.widgets.enabled", false);
+
 // Регион: единый KZ и запрет авто-обновлений - от региона зависит набор
 // поисковых движков (search-config-v2), скачки RU ломали инициализацию поиска
 // в части профилей.
