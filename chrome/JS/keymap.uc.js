@@ -38,22 +38,6 @@ function scrollHalfPage(win, down) {
         "data:,content.scrollBy(0, " + sign + "content.innerHeight / 2);", false);
 }
 
-// Нормализуем событие в форму конфига: "C+S+n".
-function comboFromEvent(e) {
-    let mods = "";
-    if (e.ctrlKey) mods += "C+";
-    if (e.shiftKey) mods += "S+";
-    if (e.altKey) mods += "A+";
-    if (e.metaKey) mods += "M+";
-    const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
-    return mods + k;
-}
-
-function isChromeEditable(target) {
-    return !!(target && target.closest &&
-        target.closest("input, textarea, [contenteditable='true']"));
-}
-
 // "C+S+n" -> { modifiers: "accel shift", key: "n" } - формат UC_API.Hotkeys
 // (модификаторы через пробел, ctrl нормализуется в accel самим API).
 function comboToHotkey(combo) {
@@ -133,24 +117,5 @@ function comboToHotkey(combo) {
         report.push(combo + "->" + action);
     }
 
-    // Комбинации из conf.internal перехватываются ДО keyset: их исходные
-    // ключи зарегистрированы в ранней таблице (internal="true"), которая
-    // игнорирует disabled и атрибуты, - listener с preventDefault ставит
-    // нас в очередь раньше. В chrome-полях перехват отменён - там натив.
-    const internal = conf.internal || {};
-    window.addEventListener("keydown", e => {
-        if (!e.isTrusted || isChromeEditable(e.target)) return;
-        const combo = comboFromEvent(e);
-        const cmdId = internal[combo];
-        if (!cmdId) return;
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        const el = document.getElementById(cmdId);
-        console.info("keymap: pre-keyset " + combo + " -> " + cmdId +
-            (el ? "" : " ЭЛЕМЕНТА НЕТ"));
-        if (el) el.doCommand();
-    }, true);
-
-    console.info("keymap: отключено " + disabled + "; бинды: " + report.join(" ") +
-        "; pre-keyset: " + Object.keys(internal).join(" "));
+    console.info("keymap: отключено " + disabled + "; бинды: " + report.join(" "));
 })();
