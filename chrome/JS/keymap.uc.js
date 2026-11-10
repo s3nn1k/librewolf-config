@@ -33,12 +33,18 @@ function sendPageKey(down) {
     utils.sendKeyEvent("keyup", code, 0, 0);
 }
 
-// "C+S+N" -> modifiers="accel,shift", key="n"
+// "C+S+N" -> modifiers="accel,shift", key="n".
+// Обязательно снимаем конфликтные атрибуты: keycode перебивает key
+// (goBackKb живёт на VK_LEFT), а data-l10n-id заставляет Fluent вернуть
+// исходную букву после DOMContentLoaded и откатить ремап.
 function applyCombo(el, combo) {
     const parts = combo.split("+");
     const letter = parts.pop().toLowerCase();
     const modMap = { C: "accel", S: "shift", A: "alt", M: "meta" };
     const mods = parts.map(p => modMap[p]).filter(Boolean).join(",");
+    el.removeAttribute("keycode");
+    el.removeAttribute("data-l10n-id");
+    el.removeAttribute("internal");
     el.setAttribute("key", letter);
     if (mods) el.setAttribute("modifiers", mods);
     else el.removeAttribute("modifiers");
@@ -60,12 +66,14 @@ function applyCombo(el, combo) {
     const keepCommands = new Set((conf.keep && conf.keep.commands) || []);
     const remap = (conf.remap) || {};
     const disabled = [];
+    const remapped = [];
 
     for (const key of keyset.querySelectorAll("key")) {
         const id = key.getAttribute("id") || "";
         const command = key.getAttribute("command") || "";
         if (id && id in remap) {
             applyCombo(key, remap[id]);
+            remapped.push(id);
             continue;
         }
         if (keepIds.has(id) || keepCommands.has(command)) continue;
@@ -87,6 +95,7 @@ function applyCombo(el, combo) {
         keyset.appendChild(el);
     }
 
-    console.info("keymap: отключено " + disabled.length + " из " +
-        keyset.querySelectorAll("key").length + " ключей");
+    console.info("keymap: отключено " + disabled.length + ", ремапнуто " +
+        remapped.length + " (" + remapped.join(", ") + "), кастомных " +
+        Object.keys(conf.custom || {}).length);
 })();
