@@ -95,7 +95,19 @@ function applyCombo(el, combo) {
         keyset.appendChild(el);
     }
 
-    console.info("keymap: отключено " + disabled.length + ", ремапнуто " +
-        remapped.length + " (" + remapped.join(", ") + "), кастомных " +
-        Object.keys(conf.custom || {}).length);
+    // Firefox строит таблицу хоткеев keyset'а один раз при загрузке окна:
+    // правки атрибутов вживую не подхватываются (отключение - исключение,
+    // оно проверяется при диспетчеризации). Замена узла на клон заставляет
+    // зарегистрировать все связки заново - канонический трюк ремап-скриптов.
+    const rebuilt = keyset.cloneNode(true);
+    keyset.parentNode.replaceChild(rebuilt, keyset);
+
+    const report = [];
+    for (const id of remapped) {
+        const k = rebuilt.querySelector("key#" + id);
+        if (k) report.push(id + "=" + (k.getAttribute("modifiers") || "") + "+" +
+            (k.getAttribute("key") || "?"));
+    }
+    console.info("keymap: отключено " + disabled.length + ", кастомных " +
+        Object.keys(conf.custom || {}).length + "; ремапы: " + report.join(" "));
 })();
