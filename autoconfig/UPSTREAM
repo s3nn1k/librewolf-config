@@ -1,0 +1,5 @@
+Вендор fx-autoconfig (MrOtherGuy): https://github.com/MrOtherGuy/fx-autoconfig
+Коммит dfdab56 (master, 2026-11). Лицензия MPL-2.0 (файл LICENSE в апстриме).
+
+Обновление вендора: заменить chrome/utils/ и autoconfig/ целиком,
+перепроверить совместимость с текущей версией LibreWolf, обновить этот файл.

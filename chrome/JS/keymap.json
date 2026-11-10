@@ -1,0 +1,46 @@
+{
+  "_doc": "Allowlist mainKeyset LibreWolf. keep - натив, remap - новая комбинация по id ключа, custom - действия keymap.uc.js; всё остальное отключается. C=Ctrl, S=Shift, A=Alt, M=Super.",
+  "keep": {
+    "ids": [
+      "key_find",
+      "key_findAgain",
+      "key_findAgain2",
+      "key_findPrevious",
+      "key_findPrevious2",
+      "key_gotoHistory",
+      "key_openDownloads",
+      "key_toggleMute",
+      "key_fullZoomEnlarge",
+      "key_fullZoomReduce",
+      "key_fullZoomReset",
+      "key_copy",
+      "key_cut",
+      "key_paste",
+      "key_undo",
+      "key_redo",
+      "key_privatebrowsing",
+      "key_stop"
+    ],
+    "commands": [
+      "cmd_fullZoomEnlarge",
+      "cmd_fullZoomReduce",
+      "cmd_fullZoomReset",
+      "cmd_handleBackspace",
+      "cmd_handleShiftBackspace"
+    ]
+  },
+  "remap": {
+    "goBackKb": "C+P",
+    "goForwardKb": "C+N",
+    "key_newNavigatorTab": "C+S+N",
+    "addBookmarkAsKb": "C+A",
+    "key_toggleReaderMode": "C+R",
+    "key_reload": "C+S+R",
+    "key_close": "C+Q"
+  },
+  "custom": {
+    "C+D": "scroll-down",
+    "C+U": "scroll-up",
+    "C+S": "focus-urlbar"
+  }
+}

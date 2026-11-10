@@ -1,4 +1,4 @@
-.PHONY: build policies lint audit
+.PHONY: build policies lint audit autoconfig
 build:
 	python3 scripts/build.py
 
@@ -7,8 +7,12 @@ policies: build
 
 lint:
 	python3 -m json.tool palette.json >/dev/null
+	python3 -m json.tool chrome/JS/keymap.json >/dev/null
 	for m in mappings/*.json policies.json; do python3 -m json.tool "$$m" >/dev/null || exit 1; done
-	PYTHONPYCACHEPREFIX=/tmp/lwcfg-pycache python3 -m py_compile scripts/build.py scripts/audit.py scripts/merge-policies.py
+	PYTHONPYCACHEPREFIX=/tmp/lwcfg-pycache python3 -m py_compile scripts/build.py scripts/audit.py scripts/merge-policies.py scripts/install-autoconfig.py
 
 audit:
 	python3 scripts/audit.py
+
+autoconfig:
+	python3 scripts/install-autoconfig.py
