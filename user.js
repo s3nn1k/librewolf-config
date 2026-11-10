@@ -70,6 +70,11 @@ user_pref("browser.safebrowsing.downloads.remote.enabled", false);              
 user_pref("browser.ml.linkPreview.enabled", false);                                     // true -> false: без AI-превью ссылок
 user_pref("browser.tabs.groups.smart.enabled", false);                                  // true -> false: без AI-группировки табов
 
+// Хоткеи: поведение навигации (сами биндинги ядра в XUL keyset - см. обсуждение autoconfig).
+user_pref("browser.quitShortcut.disabled", true);        // false (дефолт) -> true: Ctrl+Q не гасит браузер со всеми вкладками - страховка при скрытом таб-баре
+user_pref("browser.ctrlTab.sortByRecentlyUsed", false);  // false (дефолт) -> false: закрепить линейный порядок Ctrl+Tab по вкладкам, не MRU-прыжки
+user_pref("browser.backspace_action", 0);                // 2 (дефолт новых Firefox) -> 0: Backspace = назад по истории, как в навигации
+
 // UI-гигиена: фулскрин и плотность.
 user_pref("full-screen-api.warning.timeout", 0);                                        // 3000 -> 0: без плашки "сайт перешёл в полный экран"
 user_pref("browser.compactmode.show", true);                                            // false -> true: пункт "Компактно" в кастомизации тулбара
