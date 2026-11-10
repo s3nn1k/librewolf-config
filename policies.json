@@ -9,6 +9,17 @@
     "OverrideFirstRunPage": "",
     "OverridePostUpdatePage": "",
     "CaptivePortal": false,
+    "SearchEngines": {
+      "Default": "Google",
+      "Add": [
+        {
+          "Name": "Google",
+          "URLTemplate": "https://www.google.com/search?q={searchTerms}",
+          "SuggestURLTemplate": "https://www.google.com/complete/search?client=firefox&q={searchTerms}",
+          "Method": "GET"
+        }
+      ]
+    },
     "3rdparty": {
       "Extensions": {
         "{3c078156-979c-498b-8990-85f7987dd929}": {
