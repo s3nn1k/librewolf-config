@@ -1,16 +1,20 @@
 // ==UserScript==
 // @name            keymap
-// @description     nvim-раскладка ядра: allowlist mainKeyset по keymap.json
+// @description     nvim-раскладка ядра: allowlist + keydown-listener поверх keyset
 // @author          s3nn1k
 // @homepageURL     https://github.com/s3nn1k/librewolf-config
 // ==/UserScript==
 
-// Механика без решений: конфиг в chrome/JS/keymap.json.
-//   keep.ids / keep.commands - остаются нативными;
-//   remap (id -> комбинация) - переписываются key/modifiers;
-//   custom (комбинация -> действие) - создаются новые <key> с обработчиком;
-//   всё, что не покрыто keep/remap, отключается (fail-closed: новые ключи
-//   будущих версий LW выключены по умолчанию).
+// Механика без решений, конфиг в chrome/JS/keymap.json:
+//   keep.ids / keep.commands - остаются нативными (keyset не трогаем);
+//   remap (id -> комбинация) - команда берётся у исходного <key> и вешается
+//     на собственный keydown-listener, сам <key> отключается;
+//   custom (комбинация -> действие) - обработчик listener'а;
+//   всё непокрытое отключается (fail-closed).
+//
+// Почему listener, а не правка keyset: Gecko строит таблицу связок keyset'а
+// один раз при загрузке окна, правки атрибутов и клон узла не перерегистрируют
+// комбинации. Listener на capture ловит всё, keyset остаётся только для keep.
 
 const KEYMAP_ACTIONS = {
     "scroll-down": () => sendPageKey(true),
@@ -23,8 +27,8 @@ const KEYMAP_ACTIONS = {
     },
 };
 
-// Полстраницы через процессную границу не послать дёшево - шлём PgUp/PgDn
-// в сфокусированный элемент (в полях ввода прокручивается поле, не теряется).
+// Полстраницы через процессную границу дёшево не послать - шлём PgUp/PgDn
+// в сфокусированный элемент (в полях прокручивается поле, натив не теряется).
 function sendPageKey(down) {
     const utils = window.windowUtils;
     if (!utils) return;
@@ -33,21 +37,20 @@ function sendPageKey(down) {
     utils.sendKeyEvent("keyup", code, 0, 0);
 }
 
-// "C+S+N" -> modifiers="accel,shift", key="n".
-// Обязательно снимаем конфликтные атрибуты: keycode перебивает key
-// (goBackKb живёт на VK_LEFT), а data-l10n-id заставляет Fluent вернуть
-// исходную букву после DOMContentLoaded и откатить ремап.
-function applyCombo(el, combo) {
-    const parts = combo.split("+");
-    const letter = parts.pop().toLowerCase();
-    const modMap = { C: "accel", S: "shift", A: "alt", M: "meta" };
-    const mods = parts.map(p => modMap[p]).filter(Boolean).join(",");
-    el.removeAttribute("keycode");
-    el.removeAttribute("data-l10n-id");
-    el.removeAttribute("internal");
-    el.setAttribute("key", letter);
-    if (mods) el.setAttribute("modifiers", mods);
-    else el.removeAttribute("modifiers");
+// Нормализуем в форму "C+S+n": модификаторы в порядке C,S,A,M, буква в нижнем.
+function comboFromEvent(e) {
+    let mods = "";
+    if (e.ctrlKey) mods += "C+";
+    if (e.shiftKey) mods += "S+";
+    if (e.altKey) mods += "A+";
+    if (e.metaKey) mods += "M+";
+    const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+    return mods + k;
+}
+
+function isChromeEditable(target) {
+    return !!(target && target.closest &&
+        target.closest("input, textarea, [contenteditable='true']"));
 }
 
 (async () => {
@@ -65,49 +68,50 @@ function applyCombo(el, combo) {
     const keepIds = new Set((conf.keep && conf.keep.ids) || []);
     const keepCommands = new Set((conf.keep && conf.keep.commands) || []);
     const remap = (conf.remap) || {};
+    const binds = {};
+    const report = [];
     const disabled = [];
-    const remapped = [];
 
+    // Гасим всё, кроме keep: ремапнутые <key> тоже отключаем - их команды
+    // исполняет listener, оригинальная комбинация должна умереть.
     for (const key of keyset.querySelectorAll("key")) {
         const id = key.getAttribute("id") || "";
         const command = key.getAttribute("command") || "";
-        if (id && id in remap) {
-            applyCombo(key, remap[id]);
-            remapped.push(id);
-            continue;
-        }
         if (keepIds.has(id) || keepCommands.has(command)) continue;
+        if (id && id in remap) {
+            binds[remap[id]] = () => {
+                const cmd = document.getElementById(command);
+                if (cmd) cmd.doCommand();
+                else console.error("keymap: нет команды " + command);
+            };
+            report.push(remap[id] + "->" + (command || id));
+        }
         key.setAttribute("disabled", "true");
         key.removeAttribute("reserved");
         disabled.push(id || command || "анонимный");
     }
 
-    window.__keymapActions = KEYMAP_ACTIONS;
     for (const [combo, action] of Object.entries(conf.custom || {})) {
         if (!(action in KEYMAP_ACTIONS)) {
             console.error("keymap: неизвестное действие " + action);
             continue;
         }
-        const el = document.createXULElement("key");
-        el.setAttribute("id", "keymap-" + action);
-        applyCombo(el, combo);
-        el.setAttribute("oncommand", "__keymapActions['" + action + "']()");
-        keyset.appendChild(el);
+        binds[combo] = KEYMAP_ACTIONS[action];
+        report.push(combo + "->" + action);
     }
 
-    // Firefox строит таблицу хоткеев keyset'а один раз при загрузке окна:
-    // правки атрибутов вживую не подхватываются (отключение - исключение,
-    // оно проверяется при диспетчеризации). Замена узла на клон заставляет
-    // зарегистрировать все связки заново - канонический трюк ремап-скриптов.
-    const rebuilt = keyset.cloneNode(true);
-    keyset.parentNode.replaceChild(rebuilt, keyset);
+    window.addEventListener("keydown", e => {
+        if (!e.isTrusted) return;
+        // В полях chrome (urlbar и пр.) перехват отменяется - там работает натив
+        // (C+U = удалить до начала строки и т.п.), как в insert-mode nvim.
+        if (isChromeEditable(e.target)) return;
+        const fn = binds[comboFromEvent(e)];
+        if (fn) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            fn();
+        }
+    }, true);
 
-    const report = [];
-    for (const id of remapped) {
-        const k = rebuilt.querySelector("key#" + id);
-        if (k) report.push(id + "=" + (k.getAttribute("modifiers") || "") + "+" +
-            (k.getAttribute("key") || "?"));
-    }
-    console.info("keymap: отключено " + disabled.length + ", кастомных " +
-        Object.keys(conf.custom || {}).length + "; ремапы: " + report.join(" "));
+    console.info("keymap: отключено " + disabled.length + "; бинды: " + report.join(" "));
 })();

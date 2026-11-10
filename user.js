@@ -75,6 +75,9 @@ user_pref("browser.quitShortcut.disabled", true);        // false (дефолт)
 user_pref("browser.ctrlTab.sortByRecentlyUsed", false);  // false (дефолт) -> false: закрепить линейный порядок Ctrl+Tab по вкладкам, не MRU-прыжки
 user_pref("browser.backspace_action", 0);                // 2 (дефолт новых Firefox) -> 0: Backspace = назад по истории, как в навигации
 
+// DevTools: Browser Console (C+S+J) для отладки userChrome-скриптов.
+user_pref("devtools.chrome.enabled", true);           // false (дефолт) -> true: без него C+S+J молчит
+
 // UI-гигиена: фулскрин и плотность.
 user_pref("full-screen-api.warning.timeout", 0);                                        // 3000 -> 0: без плашки "сайт перешёл в полный экран"
 user_pref("browser.compactmode.show", true);                                            // false -> true: пункт "Компактно" в кастомизации тулбара
