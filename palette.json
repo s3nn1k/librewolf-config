@@ -1,0 +1,18 @@
+{
+  "bg": "#282828",
+  "lift": "#3c3836",
+  "overlay0": "#504945",
+  "selection": "#665c54",
+  "overlay1": "#7c6f64",
+  "comment": "#928374",
+  "fg_dim": "#bdae93",
+  "fg": "#d4d4d4",
+  "punct": "#ebdbb2",
+  "red": "#fb4934",
+  "orange": "#fe8019",
+  "yellow": "#fabd2f",
+  "green": "#b8bb26",
+  "cyan": "#8ec07c",
+  "blue": "#83a598",
+  "purple": "#d3869b"
+}

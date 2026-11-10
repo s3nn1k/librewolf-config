@@ -1,0 +1,231 @@
+/* userContent.css: тёмная тема about:-страниц.
+   Расстановка: git.symlinx.net/daccfiles .config/browser_stuff (без изменений);
+   палитра: ~/.config/nvim/lua/zenbox_dark/palette.lua. */
+
+@-moz-document url-prefix("about:") {
+	body {
+		background-color: {{bg}} !important;
+		color: {{fg}} !important;
+	}
+
+	* {
+		border-radius: 0px !important;
+	}
+
+	button:hover, .button:hover {
+		background-color: {{cyan}} !important;
+		color: {{bg}} !important;
+	}
+
+	{{ABOUT_TOKENS_BLOCK}}}
+
+	* {
+		--color-blue-0:  {{blue}} !important;
+		--color-blue-10: {{blue}} !important;
+		--color-blue-20: {{blue}} !important;
+		--color-blue-30: {{blue}} !important;
+		--color-blue-40: {{blue}} !important;
+		--color-blue-50: {{blue}} !important;
+		--color-blue-60: {{blue}} !important;
+		--color-blue-70: {{blue}} !important;
+		--color-blue-80: {{blue}} !important;
+		--color-blue-90: {{blue}} !important;
+		--color-cyan-0:  {{cyan}} !important;
+		--color-cyan-10: {{cyan}} !important;
+		--color-cyan-20: {{cyan}} !important;
+		--color-cyan-30: {{cyan}} !important;
+		--color-cyan-40: {{cyan}} !important;
+		--color-cyan-50: {{cyan}} !important;
+		--color-cyan-60: {{cyan}} !important;
+		--color-cyan-70: {{cyan}} !important;
+		--color-cyan-80: {{cyan}} !important;
+		--color-cyan-90: {{cyan}} !important;
+		--color-gray-0:  {{punct}} !important;
+		--color-gray-05: {{punct}} !important;
+		--color-gray-10: {{punct}} !important;
+		--color-gray-15: {{punct}} !important;
+		--color-gray-20: {{punct}} !important;
+		--color-gray-25: {{punct}} !important;
+		--color-gray-30: {{fg_dim}} !important;
+		--color-gray-35: {{fg_dim}} !important;
+		--color-gray-40: {{comment}} !important;
+		--color-gray-45: {{comment}} !important;
+		--color-gray-50: {{overlay1}} !important;
+		--color-gray-55: {{overlay0}} !important;
+		--color-gray-60: {{selection}} !important;
+		--color-gray-65: {{selection}} !important;
+		--color-gray-70: {{lift}} !important;
+		--color-gray-75: {{lift}} !important;
+		--color-gray-80: {{bg}} !important;
+		--color-gray-85: {{bg}} !important;
+		--color-gray-90: {{bg}} !important;
+		--color-green-0:  {{green}} !important;
+		--color-green-10: {{green}} !important;
+		--color-green-20: {{green}} !important;
+		--color-green-30: {{green}} !important;
+		--color-green-40: {{green}} !important;
+		--color-green-50: {{green}} !important;
+		--color-green-60: {{green}} !important;
+		--color-green-70: {{green}} !important;
+		--color-green-80: {{green}} !important;
+		--color-green-90: {{green}} !important;
+		--color-orange-0:  {{cyan}} !important;
+		--color-orange-10: {{cyan}} !important;
+		--color-orange-20: {{cyan}} !important;
+		--color-orange-30: {{cyan}} !important;
+		--color-orange-40: {{cyan}} !important;
+		--color-orange-50: {{cyan}} !important;
+		--color-orange-60: {{cyan}} !important;
+		--color-orange-70: {{cyan}} !important;
+		--color-orange-80: {{cyan}} !important;
+		--color-orange-90: {{cyan}} !important;
+		--color-pink-0:  {{cyan}} !important;
+		--color-pink-10: {{cyan}} !important;
+		--color-pink-20: {{cyan}} !important;
+		--color-pink-30: {{cyan}} !important;
+		--color-pink-40: {{cyan}} !important;
+		--color-pink-50: {{cyan}} !important;
+		--color-pink-60: {{cyan}} !important;
+		--color-pink-70: {{cyan}} !important;
+		--color-pink-80: {{cyan}} !important;
+		--color-pink-90: {{cyan}} !important;
+		--color-purple-0:  {{cyan}} !important;
+		--color-purple-10: {{cyan}} !important;
+		--color-purple-20: {{cyan}} !important;
+		--color-purple-30: {{cyan}} !important;
+		--color-purple-40: {{cyan}} !important;
+		--color-purple-50: {{cyan}} !important;
+		--color-purple-60: {{cyan}} !important;
+		--color-purple-70: {{cyan}} !important;
+		--color-purple-80: {{cyan}} !important;
+		--color-purple-90: {{cyan}} !important;
+		--color-red-0:  {{red}} !important;
+		--color-red-10: {{red}} !important;
+		--color-red-20: {{red}} !important;
+		--color-red-30: {{red}} !important;
+		--color-red-40: {{red}} !important;
+		--color-red-50: {{red}} !important;
+		--color-red-60: {{red}} !important;
+		--color-red-70: {{red}} !important;
+		--color-red-80: {{red}} !important;
+		--color-red-90: {{red}} !important;
+		--color-violet-0:  {{cyan}} !important;
+		--color-violet-10: {{cyan}} !important;
+		--color-violet-20: {{cyan}} !important;
+		--color-violet-30: {{cyan}} !important;
+		--color-violet-40: {{cyan}} !important;
+		--color-violet-50: {{cyan}} !important;
+		--color-violet-60: {{cyan}} !important;
+		--color-violet-70: {{cyan}} !important;
+		--color-violet-80: {{cyan}} !important;
+		--color-violet-90: {{cyan}} !important;
+		--color-violet-desaturated-0:  {{cyan}} !important;
+		--color-violet-desaturated-10: {{cyan}} !important;
+		--color-violet-desaturated-20: {{cyan}} !important;
+		--color-violet-desaturated-30: {{cyan}} !important;
+		--color-violet-desaturated-40: {{cyan}} !important;
+		--color-violet-desaturated-50: {{cyan}} !important;
+		--color-violet-desaturated-60: {{cyan}} !important;
+		--color-violet-desaturated-70: {{cyan}} !important;
+		--color-violet-desaturated-80: {{cyan}} !important;
+		--color-violet-desaturated-90: {{cyan}} !important;
+		--color-yellow-0:  {{yellow}} !important;
+		--color-yellow-10: {{yellow}} !important;
+		--color-yellow-20: {{yellow}} !important;
+		--color-yellow-30: {{yellow}} !important;
+		--color-yellow-40: {{yellow}} !important;
+		--color-yellow-50: {{yellow}} !important;
+		--color-yellow-60: {{yellow}} !important;
+		--color-yellow-70: {{yellow}} !important;
+		--color-yellow-80: {{yellow}} !important;
+		--color-yellow-90: {{yellow}} !important;
+	}
+
+	* {
+										--background-color-box:					{{lift}} !important;
+		--background-color-box-info:			{{lift}} !important;
+		--background-color-information:		    {{overlay0}} !important;
+		--background-color-canvas:				{{bg}} !important;
+		--border-color:							{{selection}} !important;
+		--border-color-deemphasized:			{{selection}} !important;
+		--button-background-color-muted:		{{overlay0}} !important;
+		--button-text-color-ghost-disabled:		{{comment}} !important;
+		--button-border:						2px solid var(--border-color) !important;
+		--table-row-background-color-alternate:	{{lift}} !important;
+		--text-color-accent-primary-selected:	var(--text-color) !important;
+	}
+
+	* {
+		--table-background-color:			var(--background-color-box) !important;
+		--table-border-color:				var(--border-color) !important;
+		--table-header-background-color:	var(--color-accent-primary) !important;
+		--table-row-background-color:		var(--background-color-canvas) !important;
+	}
+}
+
+::selection {
+	background: {{selection}} !important;
+	color: {{fg}} !important;
+}
+}
+
+@-moz-document url-prefix("view-source:") {
+	:root, body {
+		background: {{bg}} !important;
+		color: {{fg}} !important;
+	}
+	span[id]::before {
+		color: {{overlay1}} !important;
+	}
+	.start-tag, .end-tag { color: {{cyan}} !important; }
+	.comment { color: {{comment}} !important; }
+	.cdata, .pi { color: {{purple}} !important; }
+	.doctype, .markupdeclaration { color: {{fg_dim}} !important; }
+	.entity { color: {{yellow}} !important; }
+	.attribute-name { color: {{blue}} !important; }
+	.attribute-value { color: {{green}} !important; }
+	.error { color: {{red}} !important; background: rgba(251, 73, 52, 0.2) !important; }
+}
+
+/* PDF-просмотрщик: тот же набор дизайн-токенов, что и в хроме -
+   применяем semantic-блок из userChrome (регенерируется вместе с ним). */
+@-moz-document url-prefix("resource://pdf.js/") {
+  :root, body {
+{{CHROME_THEME_VARS}}
+  }
+}
+
+@-moz-document url-prefix("about:reader") {
+  body {
+    --main-background: {{bg}} !important;
+    --main-foreground: {{fg}} !important;
+    --link-foreground: {{blue}} !important;
+    --link-color: {{blue}} !important;
+    --link-color-hover: {{punct}} !important;
+    --link-selected-background: {{selection}} !important;
+    --link-selected-foreground: {{punct}} !important;
+    --icon-fill: {{fg}} !important;
+    --icon-disabled-fill: {{comment}} !important;
+    --outline-focus-color: {{cyan}} !important;
+    --gray-theme-background: {{lift}} !important;
+    --gray-theme-foreground: {{fg}} !important;
+    --dark-theme-background: {{bg}} !important;
+    --dark-theme-foreground: {{fg}} !important;
+  }
+}
+
+/* DevTools: своя тема --theme-* (variables.css) + фотон-примитивы, палитра zenbox_dark. */
+@-moz-document url-prefix("chrome://devtools/"), url-prefix("about:devtools-toolbox"), url-prefix("about:debugging") {
+  :root {
+{{DEVTOOLS_VARS}}
+  }
+}
+
+/* DevTools, добивка: токены отладчика (paused/inline-preview), сетевого монитора
+   (status-code/waterfall timing) и JSON-viewer (те же --theme-* на resource://). */
+@-moz-document url-prefix("chrome://devtools/"), url-prefix("about:devtools-toolbox"),
+               url-prefix("about:debugging"), url-prefix("resource://devtools") {
+  :root {
+{{DEVTOOLS_EXTRA_VARS}}
+  }
+}
