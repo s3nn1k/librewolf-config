@@ -14,7 +14,7 @@ dotfiles-fedora клонирует его в ~/projects/personal/librewolf-confi
 - chrome/JS/keymap.json - allowlist хоткеев ядра (keep/remap/custom, остальное отключается);
 - chrome/JS/keymap.uc.js + chrome/utils/ - скрипт раскладки и вендор fx-autoconfig;
 - autoconfig/ - служебные файлы для /usr/share/librewolf (ставит make autoconfig);
-- scripts/ - build, audit, merge-policies, install-autoconfig: пакетная база + оверлей + sidebery-стили.
+- scripts/ - сборка и аудит темы, merge политик (пакетная база + оверлей + sidebery-стили), установка autoconfig.
 
 ## Команды
 
@@ -34,3 +34,8 @@ dotfiles-fedora клонирует его в ~/projects/personal/librewolf-confi
 
 Установка: make autoconfig (два файла в /usr/share/librewolf) + рестарт LW.
 dnf update librewolf затирает файлы - после мажорных обновлений повторить.
+
+Активная раскладка: ремапы C+P/C+N (назад/вперёд), C+S+N (вкладка), C+Q
+(закрыть), C+S+R (перезагрузка), C+J (загрузки); кастом C+D/C+U (скролл
+полстраницы), C+S (urlbar); натив - поиск, история, закладки, зум, правка,
+C+Tab, C+S+P, Esc, select-all. Остальное (включая Backspace) выключено.
