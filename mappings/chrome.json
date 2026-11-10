@@ -287,6 +287,7 @@
   "--color-yellow-70": "yellow",
   "--color-yellow-80": "yellow",
   "--color-yellow-90": "yellow",
+  "--comment-button-selected-border-color": "cyan",
   "--dimmed-highlighter-box-content-color": "cyan@0.3",
   "--focus-outline-color": "cyan",
   "--green-status-color": "green",
