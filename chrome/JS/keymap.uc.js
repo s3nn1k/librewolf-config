@@ -17,8 +17,8 @@
 // suppressOriginal гасит исходную комбинацию.
 
 const KEYMAP_ACTIONS = {
-    "scroll-down": win => sendPageKey(win, true),
-    "scroll-up": win => sendPageKey(win, false),
+    "scroll-down": win => scrollHalfPage(win, true),
+    "scroll-up": win => scrollHalfPage(win, false),
     "focus-urlbar": win => {
         if (win.gURLBar) {
             win.gURLBar.focus();
@@ -27,14 +27,15 @@ const KEYMAP_ACTIONS = {
     },
 };
 
-// Полстраницы через процессную границу дёшево не послать - шлём PgUp/PgDn
-// в сфокусированный элемент (в полях прокручивается поле, натив не теряется).
-function sendPageKey(win, down) {
-    const utils = win.windowUtils;
-    if (!utils) return;
-    const code = down ? win.KeyEvent.DOM_VK_PAGE_DOWN : win.KeyEvent.DOM_VK_PAGE_UP;
-    utils.sendKeyEvent("keydown", code, 0, 0);
-    utils.sendKeyEvent("keyup", code, 0, 0);
+// Скролл контента из chrome: windowUtils.sendKeyEvent выпилен из Gecko,
+// frame script через messageManager исполняется в процессе страницы и
+// скроллит её окно - честные полстраницы, как C-d/C-u в nvim.
+function scrollHalfPage(win, down) {
+    const browser = win.gBrowser && win.gBrowser.selectedBrowser;
+    if (!browser || !browser.messageManager) return;
+    const sign = down ? "" : "-";
+    browser.messageManager.loadFrameScript(
+        "data:,content.scrollBy(0, " + sign + "content.innerHeight / 2);", false);
 }
 
 // "C+S+n" -> { modifiers: "accel shift", key: "n" } - формат UC_API.Hotkeys
@@ -62,17 +63,21 @@ function comboToHotkey(combo) {
     const keyset = document.getElementById("mainKeyset");
     if (!keyset) return;
 
-    // Allowlist: гасим всё, кроме keep (ремапнутые - тоже: их команда
-    // исполняется из ucKeySet, оригинальная комбинация должна умереть).
+    // Allowlist по ВСЕМ keyset'ам документа (не только mainKeyset): например,
+    // key_selectAll лежит отдельно и с internal="true" обрабатывается ранним
+    // проходом, который игнорирует disabled - внутренний флаг снимаем.
+    // Ремапнутые тоже гасим: их команда исполняется из ucKeySet.
     const keepIds = new Set((conf.keep && conf.keep.ids) || []);
     const keepCommands = new Set((conf.keep && conf.keep.commands) || []);
     let disabled = 0;
-    for (const key of keyset.querySelectorAll("key")) {
+    for (const key of document.querySelectorAll("keyset key")) {
+        if (key.closest("keyset#ucKeySet")) continue;
         const id = key.getAttribute("id") || "";
         const command = key.getAttribute("command") || "";
         if (keepIds.has(id) || keepCommands.has(command)) continue;
         key.setAttribute("disabled", "true");
         key.removeAttribute("reserved");
+        key.removeAttribute("internal");
         disabled++;
     }
 

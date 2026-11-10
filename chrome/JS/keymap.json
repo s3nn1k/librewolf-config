@@ -8,7 +8,7 @@
       "key_findPrevious",
       "key_findPrevious2",
       "key_gotoHistory",
-      "key_openDownloads",
+      "viewBookmarksSidebarKb",
       "key_toggleMute",
       "key_fullZoomEnlarge",
       "key_fullZoomReduce",
@@ -24,9 +24,7 @@
     "commands": [
       "cmd_fullZoomEnlarge",
       "cmd_fullZoomReduce",
-      "cmd_fullZoomReset",
-      "cmd_handleBackspace",
-      "cmd_handleShiftBackspace"
+      "cmd_fullZoomReset"
     ]
   },
   "remap": {
@@ -36,7 +34,8 @@
     "addBookmarkAsKb": "C+A",
     "key_toggleReaderMode": "C+R",
     "key_reload": "C+S+R",
-    "key_close": "C+Q"
+    "key_close": "C+Q",
+    "key_openDownloads": "C+J"
   },
   "custom": {
     "C+D": "scroll-down",
