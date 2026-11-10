@@ -1,8 +1,10 @@
 # librewolf-config
 
-Тема и настройки LibreWolf, палитра zenbox_dark. Отдельное репо темы браузера:
-dotfiles-fedora клонирует его в ~/projects/personal/librewolf-config и линкует
-в профили (user.js, chrome/).
+Тема zenbox_dark, политики и хоткеи ядра LibreWolf. Всё декларативно:
+palette.json + mappings/*.json + keymap.json, сборка (make build) - тупая
+подстановка без логики. dotfiles-fedora клонирует репо в
+~/projects/personal/librewolf-config и линкует user.js и chrome/ в профили;
+хоткеи применяет keymap.uc.js через fx-autoconfig (allowlist mainKeyset).
 
 ## Структура
 
