@@ -89,6 +89,7 @@ menupopup > menu{ padding-block: 0.3em !important; }
 #TabsToolbar:not(:hover) .tab-icon-overlay:not([pinned]){ opacity: 0 !important; }
 */
 
+:root {
   --airline-fallback-icon-color: #bdae93 !important;
   --arrowscrollbox-scrollicon-active-background-color: #665c54 !important;
   --arrowscrollbox-scrollicon-background-color: #282828 !important;
@@ -534,6 +535,8 @@ menupopup > menu{ padding-block: 0.3em !important; }
   --urlbarview-text-color-selected: #ebdbb2 !important;
   --violet-bg-color: #d3869b !important;
   --violet-fg-color: #282828 !important;
+}
+
 /* Жёсткая подкраска: системная тема рисует тулбар и контейнер сайдбара нативными
    цветами в обход переменных - красим элементы напрямую. */
 #navigator-toolbox > toolbar {

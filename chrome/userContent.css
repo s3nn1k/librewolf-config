@@ -17,7 +17,8 @@
 		color: #282828 !important;
 	}
 
-	  --color-blue-0: #83a598 !important;
+	* {
+		  --color-blue-0: #83a598 !important;
   --color-blue-10: #83a598 !important;
   --color-blue-20: #83a598 !important;
   --color-blue-30: #83a598 !important;
@@ -135,7 +136,8 @@
   --color-yellow-60: #fabd2f !important;
   --color-yellow-70: #fabd2f !important;
   --color-yellow-80: #fabd2f !important;
-  --color-yellow-90: #fabd2f !important;}
+  --color-yellow-90: #fabd2f !important;
+	}
 
 	* {
 		--color-blue-0:  #83a598 !important;
