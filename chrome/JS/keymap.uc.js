@@ -1,56 +1,49 @@
 // ==UserScript==
 // @name            keymap
-// @description     nvim-раскладка ядра: allowlist + keydown-listener поверх keyset
+// @description     nvim-раскладка ядра через официальный API fx-autoconfig
 // @author          s3nn1k
 // @homepageURL     https://github.com/s3nn1k/librewolf-config
 // ==/UserScript==
 
-// Механика без решений, конфиг в chrome/JS/keymap.json:
-//   keep.ids / keep.commands - остаются нативными (keyset не трогаем);
-//   remap (id -> комбинация) - команда берётся у исходного <key> и вешается
-//     на собственный keydown-listener, сам <key> отключается;
-//   custom (комбинация -> действие) - обработчик listener'а;
-//   всё непокрытое отключается (fail-closed).
+// Конфиг в chrome/JS/keymap.json:
+//   keep.ids / keep.commands - остаются нативными в mainKeyset;
+//   remap (id -> комбинация) - команда исходного <key> вешается через
+//     UC_API.Hotkeys на новую комбинацию (ключ в отдельном ucKeySet);
+//   custom (комбинация -> действие) - команда-функция того же API;
+//   всё непокрытое отключается в mainKeyset (fail-closed).
 //
-// Почему listener, а не правка keyset: Gecko строит таблицу связок keyset'а
-// один раз при загрузке окна, правки атрибутов и клон узла не перерегистрируют
-// комбинации. Listener на capture ловит всё, keyset остаётся только для keep.
+// Каноничный путь вместо ручной правки keyset: UC_API.Hotkeys.define +
+// attachToWindow сами делают <key>/<command> после загрузки окна,
+// suppressOriginal гасит исходную комбинацию.
 
 const KEYMAP_ACTIONS = {
-    "scroll-down": () => sendPageKey(true),
-    "scroll-up": () => sendPageKey(false),
-    "focus-urlbar": () => {
-        if (window.gURLBar) {
-            gURLBar.focus();
-            gURLBar.select();
+    "scroll-down": win => sendPageKey(win, true),
+    "scroll-up": win => sendPageKey(win, false),
+    "focus-urlbar": win => {
+        if (win.gURLBar) {
+            win.gURLBar.focus();
+            win.gURLBar.select();
         }
     },
 };
 
 // Полстраницы через процессную границу дёшево не послать - шлём PgUp/PgDn
 // в сфокусированный элемент (в полях прокручивается поле, натив не теряется).
-function sendPageKey(down) {
-    const utils = window.windowUtils;
+function sendPageKey(win, down) {
+    const utils = win.windowUtils;
     if (!utils) return;
-    const code = down ? KeyEvent.DOM_VK_PAGE_DOWN : KeyEvent.DOM_VK_PAGE_UP;
+    const code = down ? win.KeyEvent.DOM_VK_PAGE_DOWN : win.KeyEvent.DOM_VK_PAGE_UP;
     utils.sendKeyEvent("keydown", code, 0, 0);
     utils.sendKeyEvent("keyup", code, 0, 0);
 }
 
-// Нормализуем в форму "C+S+n": модификаторы в порядке C,S,A,M, буква в нижнем.
-function comboFromEvent(e) {
-    let mods = "";
-    if (e.ctrlKey) mods += "C+";
-    if (e.shiftKey) mods += "S+";
-    if (e.altKey) mods += "A+";
-    if (e.metaKey) mods += "M+";
-    const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
-    return mods + k;
-}
-
-function isChromeEditable(target) {
-    return !!(target && target.closest &&
-        target.closest("input, textarea, [contenteditable='true']"));
+// "C+S+n" -> { modifiers: "accel shift", key: "n" } - формат UC_API.Hotkeys
+// (модификаторы через пробел, ctrl нормализуется в accel самим API).
+function comboToHotkey(combo) {
+    const parts = combo.split("+");
+    const key = parts.pop();
+    const map = { C: "accel", S: "shift", A: "alt", M: "meta" };
+    return { modifiers: parts.map(p => map[p]).join(" "), key };
 }
 
 (async () => {
@@ -62,33 +55,40 @@ function isChromeEditable(target) {
         return;
     }
 
+    if (!window.UC_API || !window.UC_API.Hotkeys) {
+        console.error("keymap: UC_API недоступен - fx-autoconfig не загрузился");
+        return;
+    }
     const keyset = document.getElementById("mainKeyset");
     if (!keyset) return;
 
+    // Allowlist: гасим всё, кроме keep (ремапнутые - тоже: их команда
+    // исполняется из ucKeySet, оригинальная комбинация должна умереть).
     const keepIds = new Set((conf.keep && conf.keep.ids) || []);
     const keepCommands = new Set((conf.keep && conf.keep.commands) || []);
-    const remap = (conf.remap) || {};
-    const binds = {};
-    const report = [];
-    const disabled = [];
-
-    // Гасим всё, кроме keep: ремапнутые <key> тоже отключаем - их команды
-    // исполняет listener, оригинальная комбинация должна умереть.
+    let disabled = 0;
     for (const key of keyset.querySelectorAll("key")) {
         const id = key.getAttribute("id") || "";
         const command = key.getAttribute("command") || "";
         if (keepIds.has(id) || keepCommands.has(command)) continue;
-        if (id && id in remap) {
-            binds[remap[id]] = () => {
-                const cmd = document.getElementById(command);
-                if (cmd) cmd.doCommand();
-                else console.error("keymap: нет команды " + command);
-            };
-            report.push(remap[id] + "->" + (command || id));
-        }
         key.setAttribute("disabled", "true");
         key.removeAttribute("reserved");
-        disabled.push(id || command || "анонимный");
+        disabled++;
+    }
+
+    const report = [];
+    for (const [id, combo] of Object.entries(conf.remap || {})) {
+        const orig = keyset.querySelector("key#" + id);
+        const command = orig && orig.getAttribute("command");
+        if (!command) {
+            console.error("keymap: remap-ключ " + id + " без command, пропущен");
+            continue;
+        }
+        const { modifiers, key } = comboToHotkey(combo);
+        UC_API.Hotkeys
+            .define({ id: "keymap-" + id, modifiers, key, command })
+            .attachToWindow(window, { suppressOriginal: true });
+        report.push(combo + "->" + command);
     }
 
     for (const [combo, action] of Object.entries(conf.custom || {})) {
@@ -96,22 +96,13 @@ function isChromeEditable(target) {
             console.error("keymap: неизвестное действие " + action);
             continue;
         }
-        binds[combo] = KEYMAP_ACTIONS[action];
+        const { modifiers, key } = comboToHotkey(combo);
+        UC_API.Hotkeys
+            .define({ id: "keymap-" + action, modifiers, key,
+                command: win => KEYMAP_ACTIONS[action](win) })
+            .attachToWindow(window, { suppressOriginal: true });
         report.push(combo + "->" + action);
     }
 
-    window.addEventListener("keydown", e => {
-        if (!e.isTrusted) return;
-        // В полях chrome (urlbar и пр.) перехват отменяется - там работает натив
-        // (C+U = удалить до начала строки и т.п.), как в insert-mode nvim.
-        if (isChromeEditable(e.target)) return;
-        const fn = binds[comboFromEvent(e)];
-        if (fn) {
-            e.preventDefault();
-            e.stopImmediatePropagation();
-            fn();
-        }
-    }, true);
-
-    console.info("keymap: отключено " + disabled.length + "; бинды: " + report.join(" "));
+    console.info("keymap: отключено " + disabled + "; бинды: " + report.join(" "));
 })();
