@@ -287,7 +287,6 @@
 	background: #665c54 !important;
 	color: #d4d4d4 !important;
 }
-}
 
 @-moz-document url-prefix("view-source:") {
 	:root, body {
