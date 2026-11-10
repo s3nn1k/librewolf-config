@@ -43,8 +43,9 @@ dnf update librewolf затирает файлы - после мажорных �
 Причина: определения движков (search-config-v2) materializeются в IndexedDB
 профиля storage/permanent/chrome/idb/3870112724rsegmnoittet-es.sqlite; если
 RemoteSettings не дотащил коллекции (LW блокирует часть фидов), база - огрызок.
-Лечение при закрытом LW: скопировать .sqlite/.sqlite-wal/.files из живого
-профиля. Страховка - политика SearchEngines (Google задан явно в policies.json).
+Лечение: make heal при закрытом LW (scripts/heal-search.py переносит RS-базу
+и индекс движков из здорового профиля, чистит startupCache). Страховка -
+политика SearchEngines (Google задан явно в policies.json).
 
 Активная раскладка: ремапы C+P/C+N (назад/вперёд), C+S+N (вкладка), C+Q
 (закрыть), C+S+R (перезагрузка), C+J (загрузки); кастом C+D/C+U (скролл
